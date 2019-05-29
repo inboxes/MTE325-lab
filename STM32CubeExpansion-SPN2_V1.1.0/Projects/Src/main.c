@@ -35,6 +35,7 @@
 #include "example.h"
 #include "example_usart.h"
 #include "stm32f4xx_hal_adc.h"
+#include "stdio.h"
 
 #define TEST_MOTOR	//!< Comment out this line to test the ADC
 
@@ -65,7 +66,7 @@
 //#define MICROSTEPPING_MOTOR_EXAMPLE        //!< Uncomment to performe the standalone example
 #define MICROSTEPPING_MOTOR_USART_EXAMPLE  //!< Uncomment to performe the USART example
 #if ((defined (MICROSTEPPING_MOTOR_EXAMPLE)) && (defined (MICROSTEPPING_MOTOR_USART_EXAMPLE)))
-  #error "Please select an option only!"
+  #error "Please select an option on-*9+/ly!"
 #elif ((!defined (MICROSTEPPING_MOTOR_EXAMPLE)) && (!defined (MICROSTEPPING_MOTOR_USART_EXAMPLE)))
   #error "Please select an option!"
 #endif
@@ -88,6 +89,27 @@ __IO uint16_t uhADCxConvertedValue = 0;
 static void Error_Handler(void);
 uint16_t Read_ADC(void);
 
+
+void ReadPin(void){
+	GPIO_InitTypeDef GPIO_InitStruct;
+	
+	GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	
+	GPIO_CLK_ENABLE(L6470_nFLAG_GPIO.gpio_clk_enable);
+	
+	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+	
+	
+	USART_Transmit(&huart2, (uint8_t*)status);
+	
+	
+}
+
+
 /**
   * @brief The FW main module
   */
@@ -96,7 +118,6 @@ int main(void)
   /* NUCLEO board initialization */
 	/* Init for UART, ADC, GPIO and SPI */
   NUCLEO_Board_Init();
-  
   /* X-NUCLEO-IHM02A1 initialization */
   BSP_Init();
 	
@@ -121,6 +142,43 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
+		
+	/* GPIO INIT */
+		/* ReadPin(); */
+		
+		/*	GPIO_CLK_ENABLE(L6470_nFLAG_GPIO.gpio_clk_enable);*/
+	__GPIOA_CLK_ENABLE();
+		GPIO_InitTypeDef GPIO_InitStruct;
+	
+	GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		
+	GPIO_InitTypeDef GPIO_InitStruct2;
+	GPIO_InitStruct2.Pin = GPIO_PIN_4;
+  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct2.Pull = GPIO_PULLUP;
+  GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2);
+	
+	
+	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+		if(status){
+			/*USART_Transmit(&huart2, "0\n\r");*/
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
+
+		} else{
+			/*USART_Transmit(&huart2, "1\n\r");*/
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+
+		}
+		
+		
+		
+
+		
 
 #ifdef TEST_MOTOR		
 

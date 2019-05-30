@@ -86,7 +86,7 @@ __IO uint16_t uhADCxConvertedValue = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 //static void SystemClock_Config(void);
-static void Error_Handler(void);
+//static void Error_Handler(void);
 uint16_t Read_ADC(void);
 
 
@@ -107,6 +107,18 @@ void ReadPin(void){
 	USART_Transmit(&huart2, (uint8_t*)status);
 	
 	
+}
+
+
+void EXTI1_IRQHandler(void)
+{
+	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1))
+  {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+	}
+	else{
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
+	}
 }
 
 
@@ -163,20 +175,20 @@ int main(void)
   GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2);
 	
-	
+
 	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
 		if(status){
 			/*USART_Transmit(&huart2, "0\n\r");*/
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+	
 		} else{
 			/*USART_Transmit(&huart2, "1\n\r");*/
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
+	
 		}
+
 		
-		
-		
+	//EXTI1_IRQHandler();
 
 		
 
@@ -203,14 +215,14 @@ int main(void)
   * @param  None
   * @retval None
   */
-static void Error_Handler(void)
-{
-  /* Turn LED2 on */
-  BSP_LED_On(LED2);
-  while (1)
-  {
-  }
-}
+//static void Error_Handler(void)
+//{
+//  /* Turn LED2 on */
+//  BSP_LED_On(LED2);
+//  while (1)
+//  {
+//  }
+//}
 
 #ifdef USE_FULL_ASSERT
 

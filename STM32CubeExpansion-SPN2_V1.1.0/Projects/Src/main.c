@@ -98,28 +98,31 @@ void ReadPin(void){
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-	
 	GPIO_CLK_ENABLE(L6470_nFLAG_GPIO.gpio_clk_enable);
-	
 	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
-	
-	
 	USART_Transmit(&huart2, (uint8_t*)status);
-	
-	
 }
 
 
 void EXTI1_IRQHandler(void)
 {
+	
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1))
   {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
 	}
-	else{
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
+	else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)){
+		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
+	}
+	else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)){
+	}
+	else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3)){
 	}
 }
+
+
+
+
 
 
 /**
@@ -162,18 +165,41 @@ int main(void)
 	__GPIOA_CLK_ENABLE();
 		GPIO_InitTypeDef GPIO_InitStruct;
 	
+	// GPI0_PIN_1 FOR LIMIT SWITCH 1 
 	GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 		
+	// GPIO_PIN_4 FOR LIMIT SWITH 2	
 	GPIO_InitTypeDef GPIO_InitStruct2;
 	GPIO_InitStruct2.Pin = GPIO_PIN_4;
-  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+//  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct2.Pull = GPIO_PULLUP;
   GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2);
+	
+	// GPIO_PIN_3 FOR LIMIT SWITH 3	
+	GPIO_InitTypeDef GPIO_InitStruct3;
+	GPIO_InitStruct3.Pin = GPIO_PIN_4;
+//  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct3.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct3.Pull = GPIO_PULLUP;
+  GPIO_InitStruct3.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct3);
+	
+	
+	// GPIO_PIN_5 FOR LIMIT SWITH 4	
+	GPIO_InitTypeDef GPIO_InitStruct4;
+	GPIO_InitStruct4.Pin = GPIO_PIN_4;
+//  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct4.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct4.Pull = GPIO_PULLUP;
+  GPIO_InitStruct4.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct4);
+	
 	
 
 	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);

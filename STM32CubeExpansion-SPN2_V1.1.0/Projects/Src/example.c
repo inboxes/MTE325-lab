@@ -223,6 +223,7 @@ void MicrosteppingMotor_Example_01(void)
     BSP_LED_On(LED2);
 }
 
+
 /**
   * @}
   */ /* End of ExampleExportedFunctions */

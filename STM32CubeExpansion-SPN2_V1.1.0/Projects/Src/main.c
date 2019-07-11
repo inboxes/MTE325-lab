@@ -37,6 +37,7 @@
 #include "stm32f4xx_hal_adc.h"
 #include "stdio.h"
 
+
 #define TEST_MOTOR	//!< Comment out this line to test the ADC
 
 /**
@@ -110,17 +111,70 @@ void ReadPin(void){
 }
 
 
-void EXTI1_IRQHandler(void)
+void EXTI3_IRQHandler(int dir)
+{
+	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0))
+  {
+		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, 0);
+		
+		if(dir){
+			L6470_Move(0,L6470_DIR_REV_ID,1000);
+			L6470_HardStop(0);
+		}
+		else{
+			L6470_Move(0,L6470_DIR_FWD_ID,1000);
+			L6470_HardStop(0);
+		}
+	}
+	
+	//HAL_NVIC_DisableIRQ(EXTI3_IRQn);
+}
+
+void EXTI4_IRQHandler(void)
+{
+	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4))
+  {
+		//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+		
+		L6470_SoftStop(1);
+		L6470_Move(1,L6470_DIR_FWD_ID,10000);
+		L6470_HardStop(1);
+	}
+	
+	//HAL_NVIC_DisableIRQ(EXTI4_IRQn);
+}
+
+void EXTI5_IRQHandler(void)
 {
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1))
   {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, 0);
+	  L6470_HardStop(0);
+		L6470_Run(0,L6470_DIR_FWD_ID,1000);
 	}
-	else{
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	}
+	
+	//HAL_NVIC_DisableIRQ(EXTI3_IRQn);
 }
 
+void EXTI6_IRQHandler(int dir)
+{
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7))
+  {
+		if(dir){
+			L6470_SoftStop(1);
+			L6470_Move(1,L6470_DIR_REV_ID,10000);
+			L6470_HardStop(1);
+		}
+		else{
+			L6470_SoftStop(1);
+			L6470_Move(1,L6470_DIR_FWD_ID,10000);
+			L6470_HardStop(1);
+		}
+	}
+
+}
+
+int runflag = 1;
 
 /**
   * @brief The FW main module
@@ -162,7 +216,7 @@ int main(void)
 	__GPIOA_CLK_ENABLE();
 		GPIO_InitTypeDef GPIO_InitStruct;
 	
-	GPIO_InitStruct.Pin = GPIO_PIN_1;
+	GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
@@ -170,27 +224,91 @@ int main(void)
 		
 	GPIO_InitTypeDef GPIO_InitStruct2;
 	GPIO_InitStruct2.Pin = GPIO_PIN_4;
-  GPIO_InitStruct2.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct2.Pull = GPIO_PULLUP;
+  GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct2);
+		
+	GPIO_InitTypeDef GPIO_InitStruct3;	
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+		
+	GPIO_InitTypeDef GPIO_InitStruct4;
+	GPIO_InitStruct2.Pin = GPIO_PIN_1;
+  GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct2.Pull = GPIO_PULLUP;
   GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct2);
 	
 
-	GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
-		if(status){
-			/*USART_Transmit(&huart2, "0\n\r");*/
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
+	//GPIO_PinState status = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+	//	if(status){
+	//		/*USART_Transmit(&huart2, "0\n\r");*/
+	//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, 1);
+	//
+	//	} else{
+	//		/*USART_Transmit(&huart2, "1\n\r");*/
+	//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, 0);
+	//
+	//	}
+
+	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, 1);
+	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
 	
-		} else{
-			/*USART_Transmit(&huart2, "1\n\r");*/
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	
+	// LIMIT SWITCH TESTING
+	/*
+	while(runflag){
+		L6470_Run(0,L6470_DIR_FWD_ID,1000);
+		L6470_Run(1,L6470_DIR_FWD_ID,1000);
+		
+			
+		EXTI3_IRQHandler();
+		EXTI4_IRQHandler();
+		EXTI5_IRQHandler();
+		EXTI6_IRQHandler();
+		
+		if((HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0)&&HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1))){
+			
+			L6470_HardStop(0);
+			L6470_HardStop(1);
+			runflag = 0;
+			break;
 		}
-
 		
-	//EXTI1_IRQHandler();
-
+		if((HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_4)&&HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7))){
+			
+			L6470_HardStop(0);
+			L6470_HardStop(1);
+			runflag = 0;
+			break;
+		}
+	}*/
+	
+	// MOTOR CHAR TESTING
+	
+	while(runflag){
 		
+		int motor_x = 0, motor_y = 1;
+		
+		int speed = 20000;
+		int steps = 10000;
+		int dir = 1;
+
+		//L6470_Run(motor_x,L6470_DIR_FWD_ID,speed);
+		//L6470_Run(motor_y,L6470_DIR_FWD_ID,speed);
+		L6470_Run(motor_y,L6470_DIR_REV_ID,speed);
+		
+		//L6470_Move(motor_y,L6470_DIR_REV_ID,steps);
+			
+		EXTI3_IRQHandler(dir);
+		EXTI4_IRQHandler();
+		EXTI5_IRQHandler();
+		EXTI6_IRQHandler(dir);
+		
+	}
 
 #ifdef TEST_MOTOR		
 

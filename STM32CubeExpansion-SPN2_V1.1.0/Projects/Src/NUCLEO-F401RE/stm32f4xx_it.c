@@ -75,7 +75,7 @@ void SysTick_Handler(void)
 /**
 * @brief This function handles EXTI Line1 interrupt.
 */
-/**
+
 void EXTI1_IRQHandler(void)
 {
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_1) != RESET)
@@ -83,7 +83,7 @@ void EXTI1_IRQHandler(void)
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
 		BSP_L6470_FlagEventManager();
   }
-}*/
+}
 
 /**
 * @brief This function handles EXTI Line0 interrupt.
